@@ -8,11 +8,8 @@ EventMachine.run {
   couch.change {|change|
     puts "doc created, updated or deleted"
   }
-  couch.create {|change|
-    puts "doc created"
-  }
   couch.update {|change|
-    puts "doc updated"
+    puts "doc created or updated"
   }
   couch.delete {|change|
     puts "doc deleted"
