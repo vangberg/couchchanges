@@ -2,12 +2,10 @@ require "em-http"
 require "json"
 
 class CouchChanges
+  class ConnectionError < StandardError; end
+
   def change &block
     @change = block
-  end
-
-  def create &block
-    @create = block
   end
 
   def update &block
@@ -18,9 +16,14 @@ class CouchChanges
     @delete = block
   end
 
+  def error &block
+    @error = block
+  end
+
   def listen options={}
     http = http(options)
-    http.stream {|chunk| handle(chunk)}
+    http.stream  {|chunk| handle(chunk) }
+    http.errback { @error.call if @error }
   end
 
   private
@@ -30,15 +33,12 @@ class CouchChanges
 
     hash        = JSON.parse(chunk)
     hash["rev"] = hash.delete("changes")[0]["rev"]
-    edit_rev    = hash["rev"].split("-")[0].to_i
 
     @change.call(hash) if @change
 
     if hash["deleted"]
       @delete.call(hash) if @delete
-    elsif edit_rev == 1
-      @create.call(hash) if @create
-    elsif edit_rev > 1
+    else
       @update.call(hash) if @update
     end
   end

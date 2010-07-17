@@ -40,13 +40,12 @@ class TestCouchChanges < Test::Unit::TestCase
         EM.stop
       }
 
-      @changes.change {|c|
+      @changes.update {|c|
         assert_equal @doc["_id"],  c["id"]
         assert_equal @doc["_rev"], c["rev"]
         EM.stop
       }
 
-      @changes.update {|c| flunk "update triggered"; EM.stop}
       @changes.delete {|c| flunk "delete triggered"; EM.stop}
 
       listen!
@@ -64,7 +63,6 @@ class TestCouchChanges < Test::Unit::TestCase
         EM.stop
       }
 
-      @changes.create {|c| flunk "create triggered"; EM.stop}
       @changes.delete {|c| flunk "delete triggered"; EM.stop}
 
       listen!
@@ -81,7 +79,6 @@ class TestCouchChanges < Test::Unit::TestCase
         EM.stop
       }
 
-      @changes.create {|c| flunk "create triggered"; EM.stop}
       @changes.update {|c| flunk "update triggered"; EM.stop}
 
       listen!
@@ -151,7 +148,7 @@ class TestCouchChanges < Test::Unit::TestCase
 
   test "include_docs" do
     EM.run {
-      @changes.create {|c|
+      @changes.update {|c|
         assert_not_nil c["doc"]
         assert_equal @doc["_id"],  c["doc"]["_id"]
         assert_equal @doc["_rev"], c["doc"]["_rev"]
@@ -177,7 +174,7 @@ class TestCouchChanges < Test::Unit::TestCase
       db.save_doc filtered
       db.save_doc other
 
-      @changes.create {|c|
+      @changes.update {|c|
         assert_equal filtered["_id"], c["id"]
         EM.stop
       }
