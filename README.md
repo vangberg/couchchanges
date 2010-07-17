@@ -4,7 +4,6 @@ a ruby consumer for couchdb's _changes feed. eventmachine based.
 
 ## example.rb
 
-    $:.unshift "lib"
     require "eventmachine"
     require "couchchanges"
 
