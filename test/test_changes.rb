@@ -85,6 +85,19 @@ class TestCouchChanges < Test::Unit::TestCase
     }
   end
 
+  test "line spanning multiple chunks (\\n)" do
+    EM.run {
+      @changes.delete {|c|
+        assert_equal "doc1", c["id"]
+        EM.stop
+      }
+      http = listen!
+
+      http.on_decoded_body_data "{\"seq\":129,\"i"
+      http.on_decoded_body_data "d\":\"doc1\",\"changes\":[{\"rev\":\"6-9ed852183290a143552caf4df76dea87\"}],\"deleted\":true}\n"
+    }
+  end
+
   test "multiple changes" do
     EM.run {
       doc2, doc3 = {}, {"doc"=>3}

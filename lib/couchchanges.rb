@@ -22,16 +22,23 @@ class CouchChanges
 
   def listen options={}
     http = http(options)
-    http.stream  {|chunk| handle(chunk) }
+    buffer = ""
+    http.stream  {|chunk|
+      buffer += chunk
+      while line = buffer.slice!(/.+\r?\n/)
+        handle line
+      end
+    }
     http.errback { @error.call if @error }
+    http
   end
 
   private
 
-  def handle chunk
-    return if chunk.chomp.empty?
+  def handle line
+    return if line.chomp.empty?
 
-    hash        = JSON.parse(chunk)
+    hash        = JSON.parse(line)
     hash["rev"] = hash.delete("changes")[0]["rev"]
 
     @change.call(hash) if @change
