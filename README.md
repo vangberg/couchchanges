@@ -21,4 +21,7 @@ a ruby consumer for couchdb's _changes feed. eventmachine based.
       }
 
       couch.listen :url => "http://127.0.0.1:5984/my_db"
+
+      # it can listen on multiple databases at the same time!
+      couch.listen :url => "http://127.0.0.1:5984/other_db"
     }
