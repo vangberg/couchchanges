@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.description = "ruby consumer for couchdb's _changes api"
   s.authors     = ["Harry Vangberg"]
   s.files = [
-    "README",
+    "README.md",
 		"couchchanges.gemspec",
     "Rakefile",
 		"lib/couchchanges.rb",
