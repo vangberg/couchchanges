@@ -91,10 +91,10 @@ class TestCouchChanges < Test::Unit::TestCase
         assert_equal "doc1", c["id"]
         EM.stop
       }
-      http = listen!
+      listener = listen!
 
-      http.on_decoded_body_data "{\"seq\":129,\"i"
-      http.on_decoded_body_data "d\":\"doc1\",\"changes\":[{\"rev\":\"6-9ed852183290a143552caf4df76dea87\"}],\"deleted\":true}\n"
+      listener.http.on_decoded_body_data "{\"seq\":129,\"i"
+      listener.http.on_decoded_body_data "d\":\"doc1\",\"changes\":[{\"rev\":\"6-9ed852183290a143552caf4df76dea87\"}],\"deleted\":true}\n"
     }
   end
 
@@ -206,6 +206,21 @@ class TestCouchChanges < Test::Unit::TestCase
       EM.add_timer(0.2) { EM.stop }
 
       listen! :heartbeat => 100
+    }
+  end
+
+  test "reconnect on timeout" do
+    EM.run {
+      @changes.delete {|c| EM.stop}
+
+      EM.add_timer(0.2) {
+        db.delete_doc @doc
+      }
+      EM.add_timer(0.5) {
+        flunk "didn't reconnect"
+      }
+
+      listen! :timeout => 100
     }
   end
 end
