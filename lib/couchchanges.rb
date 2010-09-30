@@ -51,14 +51,16 @@ class CouchChanges
         start
       else
         hash["rev"] = hash.delete("changes")[0]["rev"]
+        callbacks hash
+      end
+    end
 
-        @changes.change.call(hash) if @changes.change
-
-        if hash["deleted"]
-          @changes.delete.call(hash) if @changes.delete
-        else
-          @changes.update.call(hash) if @changes.update
-        end
+    def callbacks hash
+      @changes.change.call hash if @changes.change
+      if hash["deleted"]
+        @changes.delete.call hash if @changes.delete
+      else
+        @changes.update.call hash if @changes.update
       end
     end
 
