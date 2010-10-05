@@ -211,6 +211,11 @@ class TestCouchChanges < Test::Unit::TestCase
 
   test "reconnect on timeout" do
     EM.run {
+      counter = 0
+      @changes.update {|c|
+        counter += 1
+        flunk "don't rerun all changes" if counter > 1
+      }
       @changes.delete {|c| EM.stop}
 
       EM.add_timer(0.2) {

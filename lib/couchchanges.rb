@@ -24,9 +24,10 @@ class CouchChanges
 
   class Listener
     def initialize changes, options
-      @changes = changes
-      @url     = options.delete(:url)
-      @options = options
+      @changes  = changes
+      @url      = options.delete(:url)
+      @options  = options
+      @last_seq = 0
     end
 
     attr_reader :http
@@ -43,12 +44,17 @@ class CouchChanges
       @http
     end
 
+    def reconnect_since last_seq
+      @options[:since] = last_seq
+      start
+    end
+
     def handle line
       return if line.chomp.empty?
 
       hash = JSON.parse(line)
       if hash["last_seq"]
-        start
+        reconnect_since hash["last_seq"]
       else
         hash["rev"] = hash.delete("changes")[0]["rev"]
         callbacks hash
