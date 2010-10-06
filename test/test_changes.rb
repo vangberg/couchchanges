@@ -183,23 +183,22 @@ class TestCouchChanges < Test::Unit::TestCase
     end
   end
 
-  #test "without disconnect: default to reconnect" do
-    #EM.run {
-      #counter = 0
-      #@changes.update {|c|
-        #counter += 1
-        #flunk "don't rerun all changes" if counter > 1
-      #}
-      #@changes.delete {|c| EM.stop}
+  test "without disconnect: default to reconnect" do
+    counter = 0
 
-      #EM.add_timer(0.2) {
-        #db.delete_doc @doc
-      #}
-      #EM.add_timer(0.5) {
-        #flunk "didn't reconnect"
-      #}
+    changes :timeout => 100 do |c|
+      c.update {|c|
+        counter += 1
+        flunk "don't rerun all changes" if counter > 1
+      }
+      c.delete {|c| EM.stop}
 
-      #listen! :timeout => 100
-    #}
-  #end
+      EM.add_timer(0.2) {
+        db.delete_doc @doc
+      }
+      EM.add_timer(0.5) {
+        flunk "didn't reconnect"
+      }
+    end
+  end
 end

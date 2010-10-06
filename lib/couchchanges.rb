@@ -48,7 +48,7 @@ class CouchChanges
 
   def reconnect_since last_seq
     @options[:since] = last_seq
-    start
+    listen
   end
 
   def handle line
@@ -56,8 +56,11 @@ class CouchChanges
 
     hash = JSON.parse(line)
     if hash["last_seq"]
-      @disconnect.call hash["last_seq"]
-      #reconnect_since hash["last_seq"]
+      if @disconnect
+        @disconnect.call hash["last_seq"]
+      else
+        reconnect_since hash["last_seq"]
+      end
     else
       hash["rev"] = hash.delete("changes")[0]["rev"]
       callbacks hash
