@@ -16,6 +16,10 @@ class CouchChanges
     block ? @delete = block : @delete
   end
 
+  def disconnect &block
+    block ? @disconnect = block : @disconnect
+  end
+
   def listen options={}
     listener = Listener.new(self, options)
     listener.start
@@ -54,7 +58,8 @@ class CouchChanges
 
       hash = JSON.parse(line)
       if hash["last_seq"]
-        reconnect_since hash["last_seq"]
+        @changes.disconnect.call hash["last_seq"]
+        #reconnect_since hash["last_seq"]
       else
         hash["rev"] = hash.delete("changes")[0]["rev"]
         callbacks hash

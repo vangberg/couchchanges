@@ -98,24 +98,24 @@ class TestCouchChanges < Test::Unit::TestCase
     }
   end
 
-  test "multiple changes" do
-    EM.run {
-      doc2, doc3 = {}, {"doc"=>3}
-      db.save_doc doc2
-      db.save_doc doc3
-      db.delete_doc doc3
+  #test "multiple changes" do
+    #EM.run {
+      #doc2, doc3 = {}, {"doc"=>3}
+      #db.save_doc doc2
+      #db.save_doc doc3
+      #db.delete_doc doc3
 
-      count = 0
+      #count = 0
 
-      @changes.change {|c| count += 1 }
-      @changes.delete {|c|
-        assert_equal 3, count
-        EM.stop
-      }
+      #@changes.change {|c| count += 1 }
+      #@changes.delete {|c|
+        #assert_equal 3, count
+        #EM.stop
+      #}
 
-      listen!
-    }
-  end
+      #listen!
+    #}
+  #end
 
   test "listen to multiple feeds" do
     EM.run {
@@ -209,23 +209,35 @@ class TestCouchChanges < Test::Unit::TestCase
     }
   end
 
-  test "reconnect on timeout" do
+  test "with disconnect: invoke with last_seq" do
     EM.run {
-      counter = 0
-      @changes.update {|c|
-        counter += 1
-        flunk "don't rerun all changes" if counter > 1
+      @changes.disconnect {|last_seq|
+        assert_equal 1, last_seq
+        EM.stop
       }
-      @changes.delete {|c| EM.stop}
+      EM.add_timer(0.2) { flunk "should invoke disconnect handler" }
 
-      EM.add_timer(0.2) {
-        db.delete_doc @doc
-      }
-      EM.add_timer(0.5) {
-        flunk "didn't reconnect"
-      }
-
-      listen! :timeout => 100
+      listen! :timeout => 1
     }
   end
+
+  #test "without disconnect: default to reconnect" do
+    #EM.run {
+      #counter = 0
+      #@changes.update {|c|
+        #counter += 1
+        #flunk "don't rerun all changes" if counter > 1
+      #}
+      #@changes.delete {|c| EM.stop}
+
+      #EM.add_timer(0.2) {
+        #db.delete_doc @doc
+      #}
+      #EM.add_timer(0.5) {
+        #flunk "didn't reconnect"
+      #}
+
+      #listen! :timeout => 100
+    #}
+  #end
 end
