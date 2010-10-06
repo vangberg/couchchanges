@@ -23,7 +23,6 @@ class CouchChanges
   def initialize options={}
     @url = options.delete(:url)
     @options = options
-    @last_seq = 0
   end
 
   def listen
@@ -46,24 +45,24 @@ class CouchChanges
     )
   end
 
-  def reconnect_since last_seq
-    @options[:since] = last_seq
-    listen
-  end
-
   def handle line
     return if line.chomp.empty?
 
     hash = JSON.parse(line)
     if hash["last_seq"]
-      if @disconnect
-        @disconnect.call hash["last_seq"]
-      else
-        reconnect_since hash["last_seq"]
-      end
+      disconnected hash["last_seq"]
     else
       hash["rev"] = hash.delete("changes")[0]["rev"]
       callbacks hash
+    end
+  end
+
+  def disconnected last_seq
+    if @disconnect
+      @disconnect.call last_seq
+    else
+      @options[:since] = last_seq
+      listen
     end
   end
 
