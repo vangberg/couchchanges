@@ -3,8 +3,8 @@ require "json"
 
 class CouchChanges
   def initialize options={}
-    @url = options.delete(:url)
-    @options = options
+    @options = options.dup
+    @url = @options.delete(:url)
   end
 
   def change &block

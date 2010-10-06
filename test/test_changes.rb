@@ -201,4 +201,11 @@ class TestCouchChanges < Test::Unit::TestCase
       }
     end
   end
+
+  test "don't modify passed in options hash" do
+    hash = {:url => "http://127.0.0.1:5984/foo"}
+    CouchChanges.new(hash)
+    
+    assert_equal({:url => "http://127.0.0.1:5984/foo"}, hash)
+  end
 end
