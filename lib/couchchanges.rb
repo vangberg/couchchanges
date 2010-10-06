@@ -2,7 +2,10 @@ require "em-http"
 require "json"
 
 class CouchChanges
-  class ConnectionError < StandardError; end
+  def initialize options={}
+    @url = options.delete(:url)
+    @options = options
+  end
 
   def change &block
     block ? @change = block : @change
@@ -18,11 +21,6 @@ class CouchChanges
 
   def disconnect &block
     block ? @disconnect = block : @disconnect
-  end
-
-  def initialize options={}
-    @url = options.delete(:url)
-    @options = options
   end
 
   def listen
