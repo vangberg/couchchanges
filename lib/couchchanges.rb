@@ -1,10 +1,11 @@
 require "em-http"
+require "uri"
 require "json"
 
 class CouchChanges
   def initialize options={}
     @options = options.dup
-    @url = @options.delete(:url)
+    @uri = URI.parse(@options.delete(:url) + "/_changes")
   end
 
   def change &block
@@ -35,12 +36,17 @@ class CouchChanges
     @http
   end
 
+  # REFACTOR!
   def http!
-    url = @url + "/_changes"
-    EM::HttpRequest.new(url).get(
+    options = {
       :timeout => 0,
       :query   => @options.merge({:feed => "continuous"})
-    )
+    }
+    if @uri.user
+      options[:head] = {'authorization' => [@uri.user, @uri.password]}
+    end
+    
+    EM::HttpRequest.new(@uri.to_s).get(options)
   end
 
   def handle line
