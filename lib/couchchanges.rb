@@ -6,6 +6,7 @@ class CouchChanges
   def initialize options={}
     @options = options.dup
     @uri = URI.parse(@options.delete(:url) + "/_changes")
+    @last_seq = 0
   end
 
   def change &block
@@ -33,6 +34,7 @@ class CouchChanges
         handle line
       end
     }
+    @http.errback { disconnected }
     @http
   end
 
@@ -54,18 +56,20 @@ class CouchChanges
 
     hash = JSON.parse(line)
     if hash["last_seq"]
-      disconnected hash["last_seq"]
+      disconnected
     else
       hash["rev"] = hash.delete("changes")[0]["rev"]
+      @last_seq = hash["seq"]
+
       callbacks hash
     end
   end
 
-  def disconnected last_seq
+  def disconnected
     if @disconnect
-      @disconnect.call last_seq
+      @disconnect.call @last_seq
     else
-      @options[:since] = last_seq
+      @options[:since] = @last_seq
       listen
     end
   end

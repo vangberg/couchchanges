@@ -3,7 +3,7 @@ require "eventmachine"
 require "couchchanges"
 
 EventMachine.run {
-  couch = CouchChanges.new
+  couch = CouchChanges.new :url => "http://127.0.0.1:5984/couchchanges"
 
   couch.change {|change|
     puts "doc created, updated or deleted"
@@ -14,6 +14,5 @@ EventMachine.run {
   couch.delete {|change|
     puts "doc deleted"
   }
-
-  couch.listen :url => "http://127.0.0.1:5984/memolane"
+  couch.listen
 }
