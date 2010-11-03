@@ -69,8 +69,10 @@ class CouchChanges
     if @disconnect
       @disconnect.call @last_seq
     else
-      @options[:since] = @last_seq
-      listen
+      EM.add_timer(@options[:reconnect]) {
+        @options[:since] = @last_seq
+        listen
+      }
     end
   end
 

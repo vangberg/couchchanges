@@ -14,7 +14,7 @@ URL      = "#{COUCH}/#{DATABASE}"
 class TestCouchChanges < Test::Unit::TestCase
   def changes options={}
     EM.run {
-      c = CouchChanges.new({:url => URL}.merge(options))
+      c = CouchChanges.new({:url => URL, :reconnect => 0}.merge(options))
       yield c
       c.listen
     }
