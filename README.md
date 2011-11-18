@@ -27,4 +27,6 @@ a ruby consumer for couchdb's _changes feed. eventmachine based.
       couch.disconnect {|last_seq|
         puts "disconnected from couch. last_seq: #{last_seq}"
       }
+      
+      couch.listen
     }
